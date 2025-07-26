@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cotacoes_app/screens/welcome_screen.dart';
 
+
 void main() {
   runApp(const MyApp());
 }

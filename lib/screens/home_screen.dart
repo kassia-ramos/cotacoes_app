@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cotacoes_app/services/cotacao_service.dart';
-import 'package:cotacoes_app/screens/detail_screen.dart'; 
+import 'package:cotacoes_app/screens/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +21,47 @@ class _HomeScreenState extends State<HomeScreen> {
   
   // Variável para armazenar o texto digitado no campo de pesquisa
   String _filterText = '';
+
+  // Mapa de ícones para as moedas
+  final Map<String, String> _moedaIcons = {
+    'USD': '🇺🇸',
+    'BRL': '🇧🇷',
+    'EUR': '🇪🇺',
+    'GBP': '🇬🇧',
+    'JPY': '🇯🇵',
+    'CAD': '🇨🇦',
+    'AUD': '🇦🇺',
+    'CHF': '🇨🇭',
+    'CNY': '🇨🇳',
+    'SEK': '🇸🇪',
+    'NZD': '🇳🇿',
+    'MXN': '🇲🇽',
+    'SGD': '🇸🇬',
+    'HKD': '🇭🇰',
+    'NOK': '🇳🇴',
+    'KRW': '🇰🇷',
+    'TRY': '🇹🇷',
+    'RUB': '🇷🇺',
+    'INR': '🇮🇳',
+    'ZAR': '🇿🇦',
+    'PLN': '🇵🇱',
+    'CZK': '🇨🇿',
+    'DKK': '🇩🇰',
+    'HUF': '🇭🇺',
+    'ILS': '🇮🇱',
+    'CLP': '🇨🇱',
+    'PHP': '🇵🇭',
+    'AED': '🇦🇪',
+    'COP': '🇨🇴',
+    'SAR': '🇸🇦',
+    'MYR': '🇲🇾',
+    'RON': '🇷🇴',
+    'THB': '🇹🇭',
+    'BGN': '🇧🇬',
+    'HRK': '🇭🇷',
+    'ISK': '🇮🇸',
+    'UAH': '🇺🇦',
+  };
 
   @override
   void initState() {
@@ -68,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cotações em Tempo Real'),
+        title: const Text('Cotações'),
         centerTitle: true,
         actions: [
           Padding(
@@ -91,7 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
               items: _moedasBaseDisponiveis.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_moedaIcons[value] ?? '💱'),
+                      const SizedBox(width: 8),
+                      Text(value),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
@@ -105,15 +153,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[300],
+                      ),
+                      const SizedBox(height: 16),
                       Text(
                         _errorMessage!,
                         style: const TextStyle(color: Colors.red, fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: _carregarCotacoes,
-                        child: const Text('Tentar Novamente'),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Tentar Novamente'),
                       ),
                     ],
                   ),
@@ -147,9 +202,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded( 
                       child: _cotacoesFiltradas.isEmpty && _filterText.isNotEmpty
                           ? Center(
-                              child: Text(
-                                'Nenhuma moeda encontrada para "$_filterText".',
-                                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 64,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Nenhuma moeda encontrada para "$_filterText".',
+                                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                  ),
+                                ],
                               ),
                             )
                           : ListView.builder(
@@ -159,8 +225,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 String rate = _cotacoesFiltradas[index].value.toStringAsFixed(4);
 
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                  elevation: 4,
+                                  margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                                  elevation: 2,
                                   child: ListTile(
                                     // Apenas navega, sem passar detalhes
                                     onTap: () {
@@ -175,8 +241,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       );
                                     },
-                                    title: Text(currency, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Text('1 $_moedaBaseSelecionada = $rate $currency'),
+                                    leading: Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          _moedaIcons[currency] ?? '💱',
+                                          style: const TextStyle(fontSize: 24),
+                                        ),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      currency, 
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      '1 $_moedaBaseSelecionada = $rate $currency',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    trailing: Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: Colors.grey[400],
+                                    ),
                                   ),
                                 );
                               },
